@@ -20,6 +20,7 @@ module Aws.Lambda.Wai
 where
 
 import Aws.Lambda
+import Control.Applicative ((<|>))
 import Control.Concurrent.MVar
 import Control.Monad (forM, forM_)
 import Data.Aeson
@@ -254,9 +255,9 @@ mkWaiRequestFromApiGw ApiGatewayRequest {..} = do
         case apiGatewayRequestPathParameters of
           Just pathParametersMap ->
             fromMaybe
-              apiGatewayRequestPath
+              (fromMaybe "" (apiGatewayRequestPath <|> apiGatewayRequestRawPath))
               (HMap.lookup "proxy" pathParametersMap)
-          Nothing -> apiGatewayRequestPath
+          Nothing -> fromMaybe "" (apiGatewayRequestPath <|> apiGatewayRequestRawPath)
 
   let pathInfo = H.decodePathSegments (encodeUtf8 requestPath)
 
@@ -274,11 +275,11 @@ mkWaiRequestFromApiGw ApiGatewayRequest {..} = do
 
   let queryParameters = toQueryStringParameters apiGatewayRequestQueryStringParameters
       rawQueryString = H.renderQuery True queryParameters
-      httpVersion = getHttpVersion apiGatewayRequestContextProtocol
+      httpVersion = getHttpVersion (fromMaybe "" apiGatewayRequestContextProtocol)
 
   let result =
         Wai.Request
-          (encodeUtf8 apiGatewayRequestHttpMethod)
+          (maybe H.methodGet encodeUtf8 apiGatewayRequestHttpMethod)
           httpVersion
           (encodeUtf8 requestPath)
           rawQueryString
