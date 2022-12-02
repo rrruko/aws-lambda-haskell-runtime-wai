@@ -277,10 +277,13 @@ mkWaiRequestFromApiGw ApiGatewayRequest {..} = do
   let queryParameters = toQueryStringParameters apiGatewayRequestQueryStringParameters
       rawQueryString = H.renderQuery True queryParameters
       httpVersion = getHttpVersion (fromMaybe "" apiGatewayRequestContextProtocol)
+      httpMethod =
+        apiGatewayRequestHttpMethod <|>
+        (apiGatewayRequestContextHttp'Method =<< apiGatewayRequestContextHttp)
 
   let result =
         Wai.Request
-          (maybe H.methodGet encodeUtf8 apiGatewayRequestHttpMethod)
+          (maybe H.methodGet encodeUtf8 httpMethod)
           httpVersion
           (encodeUtf8 requestPath)
           rawQueryString
