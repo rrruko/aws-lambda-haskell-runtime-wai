@@ -5,4 +5,4 @@ write-ghc-environment-files: never
 source-repository-package
   type: git
   location: https://github.com/rrruko/aws-lambda-haskell-runtime.git
-  tag: 82f11a572cb8759c4f6144e5c7e0015cb9c2f0ff
+  tag: 8bdff2a3165012d2d548180ecaa679c35e45b572

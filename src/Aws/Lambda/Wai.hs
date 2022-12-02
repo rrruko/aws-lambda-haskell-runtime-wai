@@ -245,9 +245,10 @@ mkWaiRequestFromALB (fmap unALBIgnoredPathPortion -> pathPortionToIgnore) ALBReq
 mkWaiRequestFromApiGw :: ApiGatewayRequest Text -> IO Wai.Request
 mkWaiRequestFromApiGw ApiGatewayRequest {..} = do
   let ApiGatewayRequestContext {..} = apiGatewayRequestRequestContext
-      ApiGatewayRequestContextIdentity {..} = apiGatewayRequestContextIdentity
 
-  ip <- parseIp apiGatewayRequestContextIdentitySourceIp
+  ip <- parseIp $
+    (apiGatewayRequestContextIdentitySourceIp =<< apiGatewayRequestContextIdentity) <|>
+    (apiGatewayRequestContextHttpSourceIp =<< apiGatewayRequestContextHttp)
 
   let requestPath =
         -- We prefer the proxied path because apiGatewayRequestPath also
