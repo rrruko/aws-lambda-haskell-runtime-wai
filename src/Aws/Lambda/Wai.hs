@@ -176,6 +176,9 @@ apiGatewayWaiHandler request context = do
 
   (status, headers, body) <- processRequest waiApplication waiRequest >>= readResponse
 
+  putStr "apiGatewayWaiHandler: Response: "
+  print (status, headers, body)
+
   if BS.null body
     then return . pure . mkApiGatewayResponse (H.statusCode status) headers $ mempty
     else case decodeUtf8' body of
